@@ -20,7 +20,7 @@ export function GroupSummaryCard({ group, index = 0 }: { group: ClientGroup; ind
       )}
     >
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-foreground text-lg">{group.name}</h3>
+        <h3 className="font-semibold text-foreground text-lg lg:text-xl">{group.name}</h3>
         <span className={cn(
           'text-xs font-mono font-bold px-2 py-0.5 rounded',
           healthPct === 100 ? 'bg-noc-ok/15 text-noc-ok' :
