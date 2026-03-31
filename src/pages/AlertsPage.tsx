@@ -6,18 +6,17 @@ import { AlertRow } from '@/components/noc/AlertRow';
 export default function AlertsPage() {
   const data = useOutletContext<ReturnType<typeof useNocData>>();
   
-  // 1. Criando os Estados para os Filtros
   const [filtroSeveridade, setFiltroSeveridade] = useState<string>('todos');
   const [filtroCliente, setFiltroCliente] = useState<string>('todos');
 
-  // 2. Extraindo lista única de clientes para o Select
-  const clientesUnicos = Array.from(new Set(data.alerts.map(a => a.device.split(' - ')[0])));
+  const clientesUnicos = Array.from(new Set(data.groups.map(g => g.name))).sort();
 
-  // 3. Aplicando os filtros na lista de alertas
   const alertasFiltrados = data.alerts.filter((alerta) => {
     const passaSeveridade = filtroSeveridade === 'todos' || alerta.severity === filtroSeveridade;
-    // Assumindo que o nome do dispositivo começa com o nome do cliente (ex: "Pepsico - Camera 01")
-    const passaCliente = filtroCliente === 'todos' || alerta.device.includes(filtroCliente);
+    
+    const passaCliente = filtroCliente === 'todos' || 
+                         alerta.group === filtroCliente || 
+                         alerta.device.includes(filtroCliente);
     
     return passaSeveridade && passaCliente;
   });

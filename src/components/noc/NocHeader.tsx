@@ -17,7 +17,7 @@ export function NocHeader({ lastUpdate, isRefreshing, onRefresh, onlineCount, of
     <header className="border-b border-border bg-card/50 backdrop-blur-sm px-6 py-3 flex items-center justify-between sticky top-0 z-10">
       <div className="flex items-center gap-4">
         <h1 className="text-xl font-bold text-foreground tracking-tight">
-          <span className="text-primary">NOC</span> Dashboard
+          <span className="text-primary">Oxy</span> Dashboard
         </h1>
         <div className="hidden md:flex items-center gap-3 text-xs font-mono">
           <span className="flex items-center gap-1.5">

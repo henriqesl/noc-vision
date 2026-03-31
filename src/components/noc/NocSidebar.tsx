@@ -1,6 +1,6 @@
 import {
   LayoutDashboard,
-  Camera,
+  Server,
   AlertTriangle,
   Activity,
 } from 'lucide-react';
@@ -20,7 +20,7 @@ import {
 
 const navItems = [
   { title: 'Visão Geral', url: '/', icon: LayoutDashboard },
-  { title: 'Câmeras', url: '/infra', icon: Camera },
+  { title: 'Infraestrutura', url: '/infra', icon: Server },
   { title: 'Alertas', url: '/alerts', icon: AlertTriangle },
 ];
 
@@ -37,7 +37,7 @@ export function NocSidebar() {
             <Activity className="h-6 w-6 text-primary" />
             {!collapsed && (
               <span className="text-lg font-bold text-foreground tracking-tight">
-                <span className="text-primary">NOC</span>Monitor
+                <span className="text-primary">Bionic </span> Noc
               </span>
             )}
           </div>
