@@ -21,7 +21,7 @@ const App = () => (
         <Routes>
           <Route element={<NocLayout />}>
             <Route path="/" element={<OverviewPage />} />
-            <Route path="/infra" element={<InfraPage />} />
+            <Route path="/cliente/:clientId" element={<ClientDetailPage />} />
             <Route path="/cameras" element={<CamerasPage />} />
             <Route path="/alerts" element={<AlertsPage />} />
           </Route>

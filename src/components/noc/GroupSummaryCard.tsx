@@ -37,7 +37,7 @@ export function GroupSummaryCard({ group, index = 0 }: { group: ClientGroup; ind
         {offline > 0 && <div className="bg-noc-critical h-full" style={{ width: `${(offline / total) * 100}%` }} />}
       </div>
 
-      <div className="mt-3 flex gap-4 text-xs">
+      <div className="mt-4 flex gap-4 text-xs lg:text-sm">
         <div className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-noc-ok" />
           <span className="text-muted-foreground">{online} online</span>

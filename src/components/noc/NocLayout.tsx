@@ -23,7 +23,7 @@ export function NocLayout() {
           <div className="flex items-center gap-2 px-6 py-2 border-b border-border bg-card/30">
             <SidebarTrigger />
           </div>
-          <main className="flex-1 p-6 overflow-auto">
+          <main className="flex-1 p-6 lg:p-8 xl:p-10 overflow-auto">
             <Outlet context={nocData} />
           </main>
         </div>
