@@ -1,8 +1,8 @@
 // Zabbix API client
 // Configure ZABBIX_URL and ZABBIX_TOKEN to enable live data
 
-const ZABBIX_URL = import.meta.env.VITE_ZABBIX_URL || '';
-const ZABBIX_TOKEN = import.meta.env.VITE_ZABBIX_TOKEN || '';
+const ZABBIX_URL = import.meta.env.VITE_ZABBIX_URL || '/zbx';
+const ZABBIX_TOKEN = import.meta.env.VITE_ZABBIX_TOKEN || '7b33392ce6331a1fd2641d6fa74d5f22fa2be2e53250c958ccab8675e91b56cd';
 
 export function isZabbixConfigured(): boolean {
   return Boolean(ZABBIX_URL && ZABBIX_TOKEN);
@@ -11,7 +11,7 @@ export function isZabbixConfigured(): boolean {
 let requestId = 1;
 
 async function zabbixRequest<T>(method: string, params: Record<string, unknown> = {}): Promise<T> {
-  const response = await fetch(`${ZABBIX_URL}/api_jsonrpc.php`, {
+  const response = await fetch(ZABBIX_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json-rpc',
