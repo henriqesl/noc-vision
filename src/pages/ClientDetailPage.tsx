@@ -152,7 +152,7 @@ export default function ClientDetailPage() {
                   device.status === 'warning' ? 'text-noc-warning' :
                   'text-noc-critical'
                 )} />
-                <p className="text-xs lg:text-sm font-medium text-foreground mt-2 truncate">{device.name}</p>
+                <p className="text-xs lg:text-sm font-medium text-foreground mt-2 break-words whitespace-normal leading-tight">{device.name}</p>
                 <span className={cn(
                   'inline-block mt-1.5 text-[10px] lg:text-xs font-mono font-bold px-2 py-0.5 rounded',
                   device.status === 'online' ? 'bg-noc-ok/15 text-noc-ok' :

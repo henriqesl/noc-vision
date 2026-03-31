@@ -20,7 +20,7 @@ import {
 
 const navItems = [
   { title: 'Visão Geral', url: '/', icon: LayoutDashboard },
-  { title: 'Câmeras', url: '/cameras', icon: Camera },
+  { title: 'Câmeras', url: '/infra', icon: Camera },
   { title: 'Alertas', url: '/alerts', icon: AlertTriangle },
 ];
 

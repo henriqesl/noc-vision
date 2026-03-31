@@ -13,9 +13,9 @@ export default defineConfig(({ mode }) => ({
     },
     proxy: {
       '/zbx': {
-        target: 'http://ec2-3-134-159-60.us-east-2.compute.amazonaws.com',
+        target: 'http://ec2-3-134-159-60.us-east-2.compute.amazonaws.com/zabbix/api_jsonrpc.php',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/zbx/, '/zabbix/api_jsonrpc.php'),
+        rewrite: (path) => path.replace(/^\/zbx/, '')
       },
     },
   },

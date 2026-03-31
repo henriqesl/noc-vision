@@ -39,7 +39,7 @@ export function DeviceCard({ device, index = 0 }: { device: Device; index?: numb
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-semibold text-foreground truncate">{device.name}</span>
+          <span className="text-sm font-semibold text-foreground break-words whitespace-normal">{device.name}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className={cn('h-2 w-2 rounded-full', statusDot[device.status], device.status === 'offline' && 'animate-pulse-dot')} />

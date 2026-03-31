@@ -1,49 +1,66 @@
+import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useNocData } from '@/hooks/use-noc-data';
 import { AlertRow } from '@/components/noc/AlertRow';
-import { AlertCircle, AlertTriangle, Info } from 'lucide-react';
 
 export default function AlertsPage() {
   const data = useOutletContext<ReturnType<typeof useNocData>>();
+  
+  // 1. Criando os Estados para os Filtros
+  const [filtroSeveridade, setFiltroSeveridade] = useState<string>('todos');
+  const [filtroCliente, setFiltroCliente] = useState<string>('todos');
 
-  const critical = data.alerts.filter(a => a.severity === 'critical');
-  const warning = data.alerts.filter(a => a.severity === 'warning');
-  const info = data.alerts.filter(a => a.severity === 'info');
+  // 2. Extraindo lista única de clientes para o Select
+  const clientesUnicos = Array.from(new Set(data.alerts.map(a => a.device.split(' - ')[0])));
+
+  // 3. Aplicando os filtros na lista de alertas
+  const alertasFiltrados = data.alerts.filter((alerta) => {
+    const passaSeveridade = filtroSeveridade === 'todos' || alerta.severity === filtroSeveridade;
+    // Assumindo que o nome do dispositivo começa com o nome do cliente (ex: "Pepsico - Camera 01")
+    const passaCliente = filtroCliente === 'todos' || alerta.device.includes(filtroCliente);
+    
+    return passaSeveridade && passaCliente;
+  });
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <div className="rounded-lg border border-noc-critical/30 bg-card px-5 py-3 flex items-center gap-2">
-          <AlertCircle className="h-4 w-4 text-noc-critical" />
-          <div>
-            <p className="text-xs text-muted-foreground">Críticos</p>
-            <p className="text-2xl font-bold font-mono text-noc-critical">{critical.length}</p>
-          </div>
-        </div>
-        <div className="rounded-lg border border-noc-warning/30 bg-card px-5 py-3 flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 text-noc-warning" />
-          <div>
-            <p className="text-xs text-muted-foreground">Alertas</p>
-            <p className="text-2xl font-bold font-mono text-noc-warning">{warning.length}</p>
-          </div>
-        </div>
-        <div className="rounded-lg border border-info/30 bg-card px-5 py-3 flex items-center gap-2">
-          <Info className="h-4 w-4 text-info" />
-          <div>
-            <p className="text-xs text-muted-foreground">Info</p>
-            <p className="text-2xl font-bold font-mono text-info">{info.length}</p>
-          </div>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <h1 className="text-2xl font-bold">Alertas Ativos</h1>
+        
+        {/* 4. Os Controles Visuais dos Filtros */}
+        <div className="flex gap-3">
+          <select 
+            className="p-2 rounded-md border bg-background"
+            value={filtroSeveridade} 
+            onChange={(e) => setFiltroSeveridade(e.target.value)}
+          >
+            <option value="todos">Todas as Severidades</option>
+            <option value="critical">Crítico (Disaster/High)</option>
+            <option value="warning">Aviso (Warning/Average)</option>
+          </select>
+
+          <select 
+            className="p-2 rounded-md border bg-background"
+            value={filtroCliente} 
+            onChange={(e) => setFiltroCliente(e.target.value)}
+          >
+            <option value="todos">Todos os Clientes</option>
+            {clientesUnicos.map(cliente => (
+              <option key={cliente} value={cliente}>{cliente}</option>
+            ))}
+          </select>
         </div>
       </div>
 
-      <div className="space-y-2">
-        {data.alerts.map((alert, i) => (
-          <AlertRow key={alert.id} alert={alert} index={i} />
-        ))}
-        {data.alerts.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground">
-            <p className="text-lg">✅ Nenhum alerta ativo</p>
-            <p className="text-sm mt-1">Todos os sistemas operando normalmente</p>
+      {/* 5. Renderizando a lista filtrada em vez da original */}
+      <div className="rounded-xl border bg-card">
+        {alertasFiltrados.length > 0 ? (
+          alertasFiltrados.map((alert) => (
+            <AlertRow key={alert.id} alert={alert} />
+          ))
+        ) : (
+          <div className="p-8 text-center text-muted-foreground">
+            Nenhum alerta encontrado com os filtros atuais.
           </div>
         )}
       </div>
