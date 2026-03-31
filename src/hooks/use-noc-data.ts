@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { generateMockData, type ClientGroup, type Alert } from '@/lib/mock-data';
+import { fetchNocData } from '@/services/noc-service';
+import type { ClientGroup, Alert } from '@/lib/mock-data';
 
 export function useNocData(refreshInterval = 8000) {
   const [groups, setGroups] = useState<ClientGroup[]>([]);
@@ -7,16 +8,18 @@ export function useNocData(refreshInterval = 8000) {
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const refresh = useCallback(() => {
+  const refresh = useCallback(async () => {
     setIsRefreshing(true);
-    // Simulate API call delay
-    setTimeout(() => {
-      const data = generateMockData();
+    try {
+      const data = await fetchNocData();
       setGroups(data.groups);
       setAlerts(data.alerts);
       setLastUpdate(new Date());
+    } catch (error) {
+      console.error('[NOC] Failed to fetch data:', error);
+    } finally {
       setIsRefreshing(false);
-    }, 300);
+    }
   }, []);
 
   useEffect(() => {
