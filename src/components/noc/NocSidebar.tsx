@@ -1,6 +1,5 @@
 import {
   LayoutDashboard,
-  Server,
   Camera,
   AlertTriangle,
   Activity,
