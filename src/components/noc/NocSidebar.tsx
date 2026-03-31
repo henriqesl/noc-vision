@@ -1,6 +1,5 @@
 import {
   LayoutDashboard,
-  Server,
   Camera,
   AlertTriangle,
   Activity,
@@ -21,7 +20,6 @@ import {
 
 const navItems = [
   { title: 'Visão Geral', url: '/', icon: LayoutDashboard },
-  { title: 'Infraestrutura', url: '/infra', icon: Server },
   { title: 'Câmeras', url: '/cameras', icon: Camera },
   { title: 'Alertas', url: '/alerts', icon: AlertTriangle },
 ];

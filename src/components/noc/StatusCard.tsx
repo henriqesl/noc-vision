@@ -13,9 +13,9 @@ interface StatusCardProps {
 
 const variantStyles = {
   default: 'border-border',
-  success: 'border-noc-ok/30 noc-glow',
-  warning: 'border-noc-warning/30 noc-warning-glow',
-  critical: 'border-noc-critical/30 noc-critical-glow',
+  success: 'border-noc-ok/40 noc-glow',
+  warning: 'border-noc-warning/40 noc-warning-glow',
+  critical: 'border-noc-critical/50 noc-critical-glow noc-offline-blink',
 };
 
 const iconVariantStyles = {
@@ -31,17 +31,17 @@ export function StatusCard({ title, value, subtitle, icon, variant = 'default', 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        'rounded-lg border bg-card p-5 transition-all',
+        'rounded-xl border bg-card p-6 lg:p-8 transition-all',
         variantStyles[variant],
         className
       )}
     >
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        <span className={cn('h-5 w-5', iconVariantStyles[variant])}>{icon}</span>
+        <p className="text-sm lg:text-base font-medium text-muted-foreground">{title}</p>
+        <span className={cn('h-6 w-6 lg:h-7 lg:w-7', iconVariantStyles[variant])}>{icon}</span>
       </div>
-      <p className="mt-2 text-3xl font-bold font-mono tracking-tight text-foreground">{value}</p>
-      {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
+      <p className="mt-3 text-4xl lg:text-5xl font-bold font-mono tracking-tight text-foreground">{value}</p>
+      {subtitle && <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p>}
     </motion.div>
   );
 }

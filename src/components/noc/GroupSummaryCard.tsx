@@ -15,12 +15,12 @@ export function GroupSummaryCard({ group, index = 0 }: { group: ClientGroup; ind
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       className={cn(
-        'rounded-lg border bg-card p-5 transition-all',
-        offline > 0 ? 'border-noc-critical/30 noc-critical-glow' : 'border-border'
+        'rounded-xl border bg-card p-6 lg:p-7 transition-all',
+        offline > 0 ? 'border-noc-critical/40 noc-offline-blink' : 'border-border hover:border-primary/30'
       )}
     >
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-foreground text-lg">{group.name}</h3>
+        <h3 className="font-semibold text-foreground text-lg lg:text-xl">{group.name}</h3>
         <span className={cn(
           'text-xs font-mono font-bold px-2 py-0.5 rounded',
           healthPct === 100 ? 'bg-noc-ok/15 text-noc-ok' :
@@ -37,7 +37,7 @@ export function GroupSummaryCard({ group, index = 0 }: { group: ClientGroup; ind
         {offline > 0 && <div className="bg-noc-critical h-full" style={{ width: `${(offline / total) * 100}%` }} />}
       </div>
 
-      <div className="mt-3 flex gap-4 text-xs">
+      <div className="mt-4 flex gap-4 text-xs lg:text-sm">
         <div className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-noc-ok" />
           <span className="text-muted-foreground">{online} online</span>
