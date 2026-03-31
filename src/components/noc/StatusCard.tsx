@@ -13,9 +13,9 @@ interface StatusCardProps {
 
 const variantStyles = {
   default: 'border-border',
-  success: 'border-noc-ok/30 noc-glow',
-  warning: 'border-noc-warning/30 noc-warning-glow',
-  critical: 'border-noc-critical/30 noc-critical-glow',
+  success: 'border-noc-ok/40 noc-glow',
+  warning: 'border-noc-warning/40 noc-warning-glow',
+  critical: 'border-noc-critical/50 noc-critical-glow noc-offline-blink',
 };
 
 const iconVariantStyles = {
