@@ -11,6 +11,13 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      '/zbx': {
+        target: 'http://ec2-3-134-159-60.us-east-2.compute.amazonaws.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/zbx/, '/zabbix/api_jsonrpc.php'),
+      },
+    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {

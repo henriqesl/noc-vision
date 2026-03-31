@@ -11,7 +11,7 @@ export function isZabbixConfigured(): boolean {
 let requestId = 1;
 
 async function zabbixRequest<T>(method: string, params: Record<string, unknown> = {}): Promise<T> {
-  const response = await fetch(`${ZABBIX_URL}/api_jsonrpc.php`, {
+  const response = await fetch(ZABBIX_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json-rpc',
