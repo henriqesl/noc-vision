@@ -5,9 +5,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { NocLayout } from "@/components/noc/NocLayout";
 import OverviewPage from "./pages/OverviewPage";
-import InfraPage from "./pages/InfraPage";
 import CamerasPage from "./pages/CamerasPage";
 import AlertsPage from "./pages/AlertsPage";
+import ClientDetailPage from "./pages/ClientDetailPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
