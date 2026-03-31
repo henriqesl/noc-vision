@@ -1,116 +1,120 @@
-// NOC Data Service — abstraction layer with Zabbix integration + mock fallback
+// Zabbix API client
+// Configure ZABBIX_URL and ZABBIX_TOKEN to enable live data
 
-import { isZabbixConfigured, fetchHosts, fetchTriggers, fetchItems, ITEM_KEYS } from './zabbix-api';
-import { generateMockData, type ClientGroup, type Alert, type Device, type AlertSeverity } from '@/lib/mock-data';
-
-export interface NocSnapshot {
-  groups: ClientGroup[];
-  alerts: Alert[];
+const ZABBIX_URL = import.meta.env.VITE_ZABBIX_URL 
+const ZABBIX_TOKEN = import.meta.env.VITE_ZABBIX_TOKEN 
+export function isZabbixConfigured(): boolean {
+  return Boolean(ZABBIX_URL && ZABBIX_TOKEN);
 }
 
-// --- Zabbix → NOC mapping ---
+let requestId = 1;
 
-function mapZabbixPriority(priority: string): AlertSeverity {
-  const p = parseInt(priority, 10);
-  if (p >= 4) return 'critical';  // high, disaster
-  if (p >= 2) return 'warning';   // warning, average
-  return 'info';
-}
-
-async function fetchFromZabbix(): Promise<NocSnapshot> {
-  const [hosts, triggers] = await Promise.all([
-    fetchHosts(),
-    fetchTriggers(),
-  ]);
-
-  // Group hosts by their first Zabbix host group
-  const groupMap = new Map<string, { id: string; name: string; devices: Device[] }>();
-
-  for (const host of hosts) {
-    const groupName = host.groups?.[0]?.name || 'Sem Grupo';
-    const groupId = host.groups?.[0]?.groupid || 'no-group';
-
-    if (!groupMap.has(groupId)) {
-      groupMap.set(groupId, { id: groupId, name: groupName, devices: [] });
-    }
-
-    // Try to fetch key items for this host
-    let cpu: number | undefined;
-    let memory: number | undefined;
-    let disk: number | undefined;
-    let latency = 0;
-
-    try {
-      const items = await fetchItems(host.hostid, [
-        ...ITEM_KEYS.CPU,
-        ...ITEM_KEYS.MEMORY,
-        ...ITEM_KEYS.DISK,
-        ...ITEM_KEYS.PING,
-      ]);
-
-      for (const item of items) {
-        const val = parseFloat(item.lastvalue);
-        if (ITEM_KEYS.CPU.some(k => item.key_.startsWith(k))) cpu = val;
-        if (ITEM_KEYS.MEMORY.some(k => item.key_.startsWith(k))) memory = val;
-        if (ITEM_KEYS.DISK.some(k => item.key_.startsWith(k))) disk = val;
-        if (item.key_.startsWith('icmppingsec')) latency = Math.round(val * 1000);
-      }
-    } catch {
-      // Items fetch failed, continue with defaults
-    }
-
-    const isOffline = host.available === '2';
-
-    const device: Device = {
-      id: host.hostid,
-      name: host.name || host.host,
-      type: 'server', // Zabbix doesn't have a direct type mapping
-      group: groupId,
-      status: isOffline ? 'offline' : 'online',
-      ip: host.host,
-      latency,
-      uptime: isOffline ? 0 : 99.9,
-      cpu,
-      memory,
-      disk,
-      lastSeen: new Date().toISOString(),
-      offlineSince: isOffline ? new Date().toISOString() : undefined,
-    };
-
-    groupMap.get(groupId)!.devices.push(device);
-  }
-
-  const groups: ClientGroup[] = Array.from(groupMap.values());
-
-  const alerts: Alert[] = triggers.map((t, i) => ({
-    id: `zabbix-${t.triggerid}`,
-    device: t.hosts?.[0]?.name || 'Desconhecido',
-    group: t.groups?.[0]?.name || 'Sem Grupo',
-    message: t.description,
-    severity: mapZabbixPriority(t.priority),
-    timestamp: new Date(parseInt(t.lastchange, 10) * 1000).toISOString(),
-    acknowledged: false,
-  }));
-
-  alerts.sort((a, b) => {
-    const order = { critical: 0, warning: 1, info: 2 };
-    return order[a.severity] - order[b.severity] || new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+async function zabbixRequest<T>(method: string, params: Record<string, unknown> = {}): Promise<T> {
+  const response = await fetch(ZABBIX_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json-rpc',
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      method,
+      params,
+      auth: ZABBIX_TOKEN,
+      id: requestId++,
+    }),
   });
 
-  return { groups, alerts };
-}
-
-// --- Public API ---
-
-export async function fetchNocData(): Promise<NocSnapshot> {
-  if (isZabbixConfigured()) {
-    try {
-      return await fetchFromZabbix();
-    } catch (error) {
-      console.warn('[NOC] Zabbix API failed, falling back to mock data:', error);
-    }
+  if (!response.ok) {
+    throw new Error(`Zabbix API HTTP error: ${response.status}`);
   }
 
-  // Fallback: mock data
-  return generateMockData();
+  const data = await response.json();
+
+  if (data.error) {
+    throw new Error(`Zabbix API error: ${data.error.data || data.error.message}`);
+  }
+
+  return data.result as T;
 }
+
+// --- Types ---
+
+export interface ZabbixHost {
+  hostid: string;
+  host: string;
+  name: string;
+  status: string; // '0' = enabled, '1' = disabled
+  available: string; // '1' = available, '2' = unavailable
+  groups: { groupid: string; name: string }[];
+}
+
+export interface ZabbixTrigger {
+  triggerid: string;
+  description: string;
+  priority: string; // '0'-'5' (not classified -> disaster)
+  value: string; // '0' = OK, '1' = PROBLEM
+  lastchange: string; // unix timestamp
+  hosts: { hostid: string; host: string; name: string }[];
+  groups?: { groupid: string; name: string }[];
+}
+
+export interface ZabbixItem {
+  itemid: string;
+  hostid: string;
+  name: string;
+  key_: string;
+  lastvalue: string;
+  units: string;
+  lastclock: string;
+}
+
+// --- API Functions ---
+
+export async function fetchHosts(): Promise<ZabbixHost[]> {
+  return zabbixRequest<ZabbixHost[]>('host.get', {
+    output: ['hostid', 'host', 'name', 'status', 'available'],
+    selectGroups: ['groupid', 'name'],
+    filter: { status: '0' }, // only enabled hosts
+    sortfield: 'name',
+  });
+}
+
+export async function fetchTriggers(minSeverity = 2): Promise<ZabbixTrigger[]> {
+  return zabbixRequest<ZabbixTrigger[]>('trigger.get', {
+    output: ['triggerid', 'description', 'priority', 'value', 'lastchange'],
+    selectHosts: ['hostid', 'host', 'name'],
+    selectGroups: ['groupid', 'name'],
+    filter: { value: '1' }, // only active problems
+    min_severity: minSeverity,
+    sortfield: 'priority',
+    sortorder: 'DESC',
+    active: true,
+    monitored: true,
+    skipDependent: true,
+  });
+}
+
+export async function fetchItems(hostId: string, keys?: string[]): Promise<ZabbixItem[]> {
+  const params: Record<string, unknown> = {
+    output: ['itemid', 'hostid', 'name', 'key_', 'lastvalue', 'units', 'lastclock'],
+    hostids: hostId,
+    sortfield: 'name',
+  };
+
+  if (keys?.length) {
+    params.search = { key_: keys };
+    params.searchByAny = true;
+  }
+
+  return zabbixRequest<ZabbixItem[]>('item.get', params);
+}
+
+// Common item keys for monitoring
+export const ITEM_KEYS = {
+  CPU: ['system.cpu.util', 'system.cpu.load'],
+  MEMORY: ['vm.memory.utilization', 'vm.memory.size'],
+  DISK: ['vfs.fs.size', 'vfs.fs.pused'],
+  NETWORK: ['net.if.in', 'net.if.out'],
+  UPTIME: ['system.uptime'],
+  PING: ['icmpping', 'icmppingsec'],
+} as const;
