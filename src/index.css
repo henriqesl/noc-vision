@@ -55,9 +55,9 @@
     --sidebar-ring: 175 80% 45%;
 
     --noc-glow: 175 80% 45%;
-    --noc-critical: 0 72% 51%;
-    --noc-warning: 38 92% 50%;
-    --noc-ok: 142 71% 45%;
+    --noc-critical: 0 80% 55%;
+    --noc-warning: 45 100% 55%;
+    --noc-ok: 145 85% 50%;
     --noc-unknown: 220 10% 40%;
 
     --font-display: 'Inter', sans-serif;
