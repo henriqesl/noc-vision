@@ -15,8 +15,8 @@ export function GroupSummaryCard({ group, index = 0 }: { group: ClientGroup; ind
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       className={cn(
-        'rounded-lg border bg-card p-5 transition-all',
-        offline > 0 ? 'border-noc-critical/30 noc-critical-glow' : 'border-border'
+        'rounded-xl border bg-card p-6 lg:p-7 transition-all',
+        offline > 0 ? 'border-noc-critical/40 noc-offline-blink' : 'border-border hover:border-primary/30'
       )}
     >
       <div className="flex items-center justify-between">
