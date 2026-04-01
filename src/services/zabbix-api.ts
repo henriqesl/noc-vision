@@ -1,8 +1,5 @@
-// Zabbix API client
-// Configure ZABBIX_URL and ZABBIX_TOKEN to enable live data
-
-const ZABBIX_URL = import.meta.env.VITE_ZABBIX_URL || '/zbx';
-const ZABBIX_TOKEN = import.meta.env.VITE_ZABBIX_TOKEN || '7b33392ce6331a1fd2641d6fa74d5f22fa2be2e53250c958ccab8675e91b56cd';
+const ZABBIX_URL = import.meta.env.VITE_ZABBIX_URL 
+const ZABBIX_TOKEN = import.meta.env.VITE_ZABBIX_TOKEN 
 
 export function isZabbixConfigured(): boolean {
   return Boolean(ZABBIX_URL && ZABBIX_TOKEN);
@@ -38,23 +35,21 @@ async function zabbixRequest<T>(method: string, params: Record<string, unknown> 
   return data.result as T;
 }
 
-// --- Types ---
-
 export interface ZabbixHost {
   hostid: string;
   host: string;
   name: string;
-  status: string; // '0' = enabled, '1' = disabled
-  available: string; // '1' = available, '2' = unavailable
+  status: string; 
+  available: string; 
   groups: { groupid: string; name: string }[];
 }
 
 export interface ZabbixTrigger {
   triggerid: string;
   description: string;
-  priority: string; // '0'-'5' (not classified -> disaster)
-  value: string; // '0' = OK, '1' = PROBLEM
-  lastchange: string; // unix timestamp
+  priority: string; 
+  value: string; 
+  lastchange: string; 
   hosts: { hostid: string; host: string; name: string }[];
   groups?: { groupid: string; name: string }[];
 }
@@ -69,13 +64,19 @@ export interface ZabbixItem {
   lastclock: string;
 }
 
-// --- API Functions ---
+// --- NOVA INTERFACE DOS PROXIES ---
+export interface ZabbixProxy {
+  proxyid: string;
+  host?: string; // Usado no Zabbix 6.0
+  name?: string; // Usado no Zabbix 7.0
+  lastaccess: string;
+}
 
 export async function fetchHosts(): Promise<ZabbixHost[]> {
   return zabbixRequest<ZabbixHost[]>('host.get', {
     output: ['hostid', 'host', 'name', 'status', 'available'],
     selectGroups: ['groupid', 'name'],
-    filter: { status: '0' }, // only enabled hosts
+    filter: { status: '0' }, 
     sortfield: 'name',
   });
 }
@@ -85,13 +86,19 @@ export async function fetchTriggers(minSeverity = 2): Promise<ZabbixTrigger[]> {
     output: ['triggerid', 'description', 'priority', 'value', 'lastchange'],
     selectHosts: ['hostid', 'host', 'name'],
     selectGroups: ['groupid', 'name'],
-    filter: { value: '1' }, // only active problems
+    filter: { value: '1' }, 
     min_severity: minSeverity,
     sortfield: 'priority',
     sortorder: 'DESC',
     active: true,
     monitored: true,
     skipDependent: true,
+  });
+}
+
+export async function fetchProxies(): Promise<ZabbixProxy[]> {
+  return zabbixRequest<ZabbixProxy[]>('proxy.get', {
+    output: 'extend',
   });
 }
 
@@ -110,7 +117,13 @@ export async function fetchItems(hostId: string, keys?: string[]): Promise<Zabbi
   return zabbixRequest<ZabbixItem[]>('item.get', params);
 }
 
-// Common item keys for monitoring
+export async function fetchMetrics(keys: string[]): Promise<ZabbixItem[]> {
+  return zabbixRequest<ZabbixItem[]>('item.get', {
+    output: ['hostid', 'key_', 'lastvalue'],
+    filter: { key_: keys, status: '0' }, 
+  });
+}
+
 export const ITEM_KEYS = {
   CPU: ['system.cpu.util', 'system.cpu.load'],
   MEMORY: ['vm.memory.utilization', 'vm.memory.size'],

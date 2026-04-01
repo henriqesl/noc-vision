@@ -11,6 +11,12 @@ export default function OverviewPage() {
   const criticalAlerts = data.alerts.filter(a => a.severity === 'critical');
   const warningAlerts = data.alerts.filter(a => a.severity === 'warning');
 
+  // Filtra a lista apenas com os grupos que queremos mostrar nos cards
+  const gruposVisiveis = data.groups.filter(g => 
+    g.name.toUpperCase().includes('[BASE]') || 
+    g.name.toUpperCase().includes('[CLIENTE]')
+  );
+
   return (
     <div className="space-y-8 lg:space-y-10">
       <CriticalBanner
@@ -50,7 +56,7 @@ export default function OverviewPage() {
       <div>
         <h2 className="text-xl lg:text-2xl font-semibold text-foreground mb-4 lg:mb-5">Status por Cliente</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 lg:gap-6">
-          {data.groups.map((group, i) => (
+          {gruposVisiveis.map((group, i) => (
             <Link key={group.id} to={`/cliente/${group.id}`} className="block hover:scale-[1.02] transition-transform">
               <GroupSummaryCard group={group} index={i} />
             </Link>

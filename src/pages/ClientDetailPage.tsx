@@ -3,7 +3,7 @@ import { useNocData } from '@/hooks/use-noc-data';
 import { AlertRow } from '@/components/noc/AlertRow';
 import { StatusCard } from '@/components/noc/StatusCard';
 import { CriticalBanner } from '@/components/noc/CriticalBanner';
-import { ArrowLeft, Monitor, MonitorOff, AlertTriangle, Camera, Server, Wifi } from 'lucide-react';
+import { ArrowLeft, Monitor, MonitorOff, AlertTriangle, Camera, Server, Wifi, Activity, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -89,7 +89,7 @@ export default function ClientDetailPage() {
             Dispositivos Offline ({offline.length})
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {offline.map((device, i) => {
+            {offline.map((device: any, i) => {
               const Icon = typeIcon[device.type] || Server;
               return (
                 <motion.div
@@ -131,7 +131,7 @@ export default function ClientDetailPage() {
       <div>
         <h2 className="text-xl font-semibold text-foreground mb-4">Todos os Dispositivos</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 lg:gap-4">
-          {devices.map((device, i) => {
+          {devices.map((device: any, i) => {
             const Icon = typeIcon[device.type] || Server;
             return (
               <motion.div
@@ -140,21 +140,40 @@ export default function ClientDetailPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.02 }}
                 className={cn(
-                  'rounded-xl border bg-card p-4 text-center transition-all',
+                  'rounded-xl border bg-card p-4 text-center transition-all flex flex-col justify-between items-center',
                   device.status === 'online' ? 'border-noc-ok/20' :
                   device.status === 'warning' ? 'border-noc-warning/30 noc-warning-glow' :
                   'border-noc-critical/40 noc-offline-blink'
                 )}
               >
-                <Icon className={cn(
-                  'h-7 w-7 lg:h-8 lg:w-8 mx-auto',
-                  device.status === 'online' ? 'text-noc-ok' :
-                  device.status === 'warning' ? 'text-noc-warning' :
-                  'text-noc-critical'
-                )} />
-                <p className="text-xs lg:text-sm font-medium text-foreground mt-2 break-words whitespace-normal leading-tight">{device.name}</p>
+                <div className="flex-1 w-full">
+                  <Icon className={cn(
+                    'h-7 w-7 lg:h-8 lg:w-8 mx-auto',
+                    device.status === 'online' ? 'text-noc-ok' :
+                    device.status === 'warning' ? 'text-noc-warning' :
+                    'text-noc-critical'
+                  )} />
+                  <p className="text-xs lg:text-sm font-medium text-foreground mt-2 break-words whitespace-normal leading-tight">{device.name}</p>
+                </div>
+
+                {/* Bloco de Métricas (Latência e Uptime) */}
+                {(device.latency || device.uptime) && device.status === 'online' && (
+                  <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 w-full text-[10px] text-muted-foreground mt-3 border-t border-border/50 pt-2">
+                    {device.latency && (
+                      <span className="flex items-center gap-1">
+                        <Activity className="h-3 w-3" /> {device.latency}
+                      </span>
+                    )}
+                    {device.uptime && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" /> {device.uptime}
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 <span className={cn(
-                  'inline-block mt-1.5 text-[10px] lg:text-xs font-mono font-bold px-2 py-0.5 rounded',
+                  'inline-block mt-2 text-[10px] lg:text-xs font-mono font-bold px-2 py-0.5 rounded',
                   device.status === 'online' ? 'bg-noc-ok/15 text-noc-ok' :
                   device.status === 'warning' ? 'bg-noc-warning/15 text-noc-warning' :
                   'bg-noc-critical/15 text-noc-critical'
